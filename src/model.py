@@ -62,10 +62,10 @@ def create_style_transfer_model(
         content_img (Tensor): Preprocessed content image tensor of shape
             (C, H, W) or (1, C, H, W).
         content_layers (Optional[List[str]]): Layer names at which to compute
-            content loss. Defaults to ["conv4_2"].
+            content loss. Defaults to ["conv_4"].
         style_layers (Optional[List[str]]): Layer names at which to compute
             style loss. Defaults to
-            ["conv1_1", "conv2_1", "conv3_1", "conv4_1", "conv5_1"].
+            ["conv_1", "conv_2", "conv_3", "conv_4", "conv_5"].
 
     Returns:
         Tuple:
@@ -75,10 +75,10 @@ def create_style_transfer_model(
             - style_losses (List[StyleLoss]): Style loss modules.
     """
     if content_layers is None:
-        content_layers = ["conv4_2"]
+        content_layers = ["conv_4"]
         
     if style_layers is None:
-        style_layers = ["conv1_1", "conv2_1", "conv3_1", "conv4_1", "conv5_1"]
+        style_layers = ["conv_1", "conv_2", "conv_3", "conv_4", "conv_5"]
         
     model = nn.Sequential(Normalization())
     cnn: nn.Sequential = _load_model()
