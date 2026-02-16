@@ -3,7 +3,7 @@ Loss modules for neural style transfer.
 
 This module implements content and style loss layers as described in:
 
-    Gatys et al., "Image Style Transfer Using Convolutional Neural Networks"
+    Gatys et al., "A neural Algorithm of Artistic Style"
 
 The losses are designed to be inserted into a CNN model. Each module
 computes its respective loss during the forward pass while returning
