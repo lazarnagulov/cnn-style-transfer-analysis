@@ -16,9 +16,9 @@ def main(argv) -> None:
     
     style_img   = load_image(argv[1], imsize, device)
     content_img = load_image(argv[2], imsize, device)
-    input_img = content_img.clone()
+    input_img   = content_img.clone()
 
-    output = run_style_transfer(content_img, style_img, input_img, steps=200, debug=True)
+    output = run_style_transfer(content_img, style_img, input_img)
     save_image(output, RESULTS_DIR)
 
 if __name__ == "__main__":
