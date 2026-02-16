@@ -140,7 +140,8 @@ def run_style_transfer(
     input_img: Tensor,
     steps: int = 400,
     alpha: float = 1.0,
-    beta: float = 1_000_000.0
+    beta: float = 1_000_000.0,
+    debug: bool = False,
 ) -> Tensor:
     """
     Run neural style transfer optimization.
@@ -163,7 +164,8 @@ def run_style_transfer(
             Defaults to 1.0.
         beta (float, optional): Weight assigned to the style loss.
             Defaults to 1_000_000.0.
-
+        debug (bool): Show debug prints
+            Defaults to False
     Returns:
         Tensor: The optimized image tensor after style transfer.
     """
@@ -199,7 +201,9 @@ def run_style_transfer(
         
         return total_loss 
 
-    for _ in range(steps):
+    for i in range(steps):
+        if i % 20 == 0 and debug:
+            print(f"Step {i}/{steps}")
         optimizer.step(style_transfer_step)
     
     with torch.no_grad():
