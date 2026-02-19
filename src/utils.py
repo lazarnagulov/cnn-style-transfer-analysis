@@ -20,12 +20,11 @@ CNN_NORMALIZATION_STD  = torch.tensor([0.229, 0.224, 0.225])
 def load_image(image_name: str, image_size: int, device: torch.device) -> torch.Tensor:
     """
     Load an image from disk and convert it to a normalized tensor suitable for
-    neural style transfer  processing.
+    neural style transfer processing.
 
     Args:
         image_name (str): Path to the input image file.
-        image_size (int): Desired size for the image's shorter side (image will be resized
-                          while maintaining aspect ratio).
+        image_size (int): Desired image size.
         device (torch.device): Device to load the image onto (e.g., 'cpu' or 'cuda').
 
     Returns:
