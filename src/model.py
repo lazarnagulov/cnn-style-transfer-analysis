@@ -6,12 +6,19 @@ This module provides:
 - `Normalization`: a module to normalize images using ImageNet mean and std.
 - `create_style_transfer_model`: builds the style transfer model by inserting content and style loss layers
   at specified positions.
+- `create_optimizer`: Returns a PyTorch optimizer configured to update the input image.
+  Supports LBFGS by default; will be extended to other optimizers (Adam, SGD, RMSProp) for experimentation.
+- `run_style_transfer`: Performs neural style transfer on the input image.
+  Optimizes the image to minimize style and content losses using the selected optimizer,
+  returning the stylized output image.
 
 """
 from typing import List, Optional, Tuple
 import torch
 from torch import Tensor
 import torch.nn as nn
+import torch.optim as optim
+from torch.optim import Optimizer
 
 from torchvision.models import vgg19, VGG19_Weights
 
@@ -111,6 +118,99 @@ def create_style_transfer_model(
             style_losses.append(_insert_style_loss_layer(model, style_img, f"style_loss_{conv_count}"))
 
     return _trim_model(model), content_losses, style_losses
+
+def create_optimizer(input_img: Tensor) -> Optimizer:
+    """
+    Create the optimizer used for neural style transfer.
+
+    Args:
+        input_img (Tensor): The image tensor to be optimized. Must have
+            ``requires_grad=True``.
+
+    Returns:
+        Optimizer: An instance of ``torch.optim.LBFGS`` configured to
+        update the input image.
+    """
+    optimizer = optim.LBFGS([input_img])
+    return optimizer
+
+def run_style_transfer(
+    content_img: Tensor,
+    style_img: Tensor,
+    input_img: Tensor,
+    steps: int = 400,
+    alpha: float = 1.0,
+    beta: float = 1_000_000.0,
+    debug: bool = False,
+) -> Tensor:
+    """
+    Run neural style transfer optimization.
+
+    This function constructs the style transfer model, then optimizes
+    the input image to simultaneously minimize content and style losses.
+
+    The input image is updated in-place using L-BFGS.
+
+    Args:
+        content_img (Tensor): Preprocessed content image tensor of shape
+            (1, C, H, W).
+        style_img (Tensor): Preprocessed style image tensor of shape
+            (1, C, H, W).
+        input_img (Tensor): Initial image tensor to optimize. Typically
+            initialized as a copy of the content image or random noise.
+        steps (int, optional): Number of optimization iterations.
+            Defaults to 400.
+        alpha (float, optional): Weight assigned to the content loss.
+            Defaults to 1.0.
+        beta (float, optional): Weight assigned to the style loss.
+            Defaults to 1_000_000.0.
+        debug (bool): Show debug prints
+            Defaults to False
+    Returns:
+        Tensor: The optimized image tensor after style transfer.
+    """
+    model, content_losses, style_losses = create_style_transfer_model(style_img, content_img)
+    input_img.requires_grad_(True)
+    model.eval()
+    model.requires_grad_(False)
+    optimizer = create_optimizer(input_img)
+
+    def style_transfer_step():
+        """
+        Perform a single optimization step for L-BFGS.
+
+        This closure:
+            - Clamps the image to valid pixel range
+            - Computes forward pass
+            - Accumulates content and style losses
+            - Performs backward pass
+
+        Returns:
+            Tensor: Scalar total loss tensor used by L-BFGS.
+        """
+        with torch.no_grad():
+            input_img.clamp_(0, 1)
+        
+        optimizer.zero_grad()
+        model(input_img)
+        content_loss = alpha * sum(cl.loss for cl in content_losses)
+        style_loss   = beta  * sum(sl.loss for sl in style_losses)
+
+        total_loss = style_loss + content_loss
+        total_loss.backward() # ty: ignore
+        
+        return total_loss 
+
+    for i in range(steps):
+        if i % 20 == 0 and debug:
+            print(f"Step {i}/{steps}")
+        optimizer.step(style_transfer_step)
+    
+    with torch.no_grad():
+        input_img.clamp_(0,1)
+        input_img.requires_grad_(False)
+    
+    return input_img
 
 def _insert_content_loss_layer(model: nn.Sequential, content_img: Tensor, name: str) -> ContentLoss:
     """
