@@ -22,8 +22,8 @@ from torch.optim import Optimizer
 
 from torchvision.models import vgg19, VGG19_Weights
 
-from losses import ContentLoss, StyleLoss
-from utils import CNN_NORMALIZATION_MEAN, CNN_NORMALIZATION_STD
+from .losses import ContentLoss, StyleLoss
+from .utils import CNN_NORMALIZATION_MEAN, CNN_NORMALIZATION_STD
 
 class Normalization(nn.Module):
     """

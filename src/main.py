@@ -2,8 +2,8 @@ import os
 import sys
 import torch
 
-from model import run_style_transfer
-from utils import load_image, save_image
+from nst.model import run_style_transfer
+from nst.utils import load_image, save_image
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS_DIR = os.path.join(BASE_DIR, "results")

@@ -17,7 +17,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 
-import gram_matrix as G
+import nst.gram_matrix as G
 
 class ContentLoss(nn.Module):
     """
