@@ -1,12 +1,12 @@
 content_image: ./data/content/sir_isaac_newton.jpg
-style_image: ./data/style/les_demoiselles_dAvignon.jpg
+style_image: ./data/style/the_scream.jpg
 output_path: ./results
 
 image_size: 512
 steps: 300
 
 alpha: 1.0
-beta: 10000.0
+beta: 1000.0
 
 content_layers:
   - conv4_2
@@ -14,3 +14,6 @@ content_layers:
 style_layers:
   - conv1_1
   - conv2_1
+  - conv3_1
+  - conv4_1
+  - conv5_1
