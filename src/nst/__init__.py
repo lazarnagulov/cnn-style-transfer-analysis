@@ -7,7 +7,7 @@ combine the content of one image with the artistic style of another.
 
 The implementation is structured into reusable components including
 Gram matrix computation, content and style loss modules, model construction
-utilities, optimization routines, and image preprocessing helpers.
+utilities, optimization routines and image preprocessing helpers.
 
 This module provides:
 - Gram matrix computation for feature correlation extraction
