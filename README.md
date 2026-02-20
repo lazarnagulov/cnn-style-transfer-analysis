@@ -61,3 +61,50 @@ GPU device: NVIDIA GeForce RTX 3060
 ```
 If `CUDA available` is True, your Neural Style Transfer will automatically run on the GPU, dramatically speeding up training.
 <br/>
+
+## Running Experiments
+
+The project uses a configuration system (`ExperimentConfig`) which supports both YAML files and command-line arguments (CLI). 
+
+1. Using a YAML configuration file
+```yaml
+content_image: ./data/content/sir_isaac_newton.jpg
+style_image: ./data/style/the_scream.jpg
+output_path: ./results/output.jpg
+image_size: 512
+steps: 100
+alpha: 1.0
+beta: 1000000.0
+content_layers:
+  - conv4_2
+
+style_layers:
+  - conv1_1
+  - conv2_1
+  - conv3_1
+  - conv4_1
+  - conv5_1
+```
+Run the experiment using the YAML file:
+```bash
+python ./src/main.py --config ./configs/config_example.yaml
+```
+
+2. Using command-line arguments directly
+
+You can override any parameter directly via CLI without a YAML file:
+```bash
+python ./src/main.py \
+    --content_image ./data/content/sir_isaac_newton.jpg \
+    --style_image ./data/style/the_scream.jpg \
+    --output_path: ./results/output.jpg \
+    --image_size 512 \
+    --steps 400 \
+    --alpha 1.0 \
+    --beta 1000000.0 \
+    --content_layers conv4_2 \
+    --style_layers conv1_1 conv2_1 conv3_1 conv4_1 conv5_1 \
+```
+> Note: CLI arguments will override any values defined in a YAML configuration.
+
+All stylized images are saved to the location specified by output_path (default is inside ./results/).

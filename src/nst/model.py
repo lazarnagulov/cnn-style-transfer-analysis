@@ -22,8 +22,8 @@ from torch.optim import Optimizer
 
 from torchvision.models import vgg19, VGG19_Weights
 
-from losses import ContentLoss, StyleLoss
-from utils import CNN_NORMALIZATION_MEAN, CNN_NORMALIZATION_STD
+from .losses import ContentLoss, StyleLoss
+from .utils import CNN_NORMALIZATION_MEAN, CNN_NORMALIZATION_STD
 
 class Normalization(nn.Module):
     """
@@ -69,10 +69,10 @@ def create_style_transfer_model(
         content_img (Tensor): Preprocessed content image tensor of shape
             (C, H, W) or (1, C, H, W).
         content_layers (Optional[List[str]]): Layer names at which to compute
-            content loss. Defaults to ["conv_4"].
+            content loss. Defaults to ["conv4_2"].
         style_layers (Optional[List[str]]): Layer names at which to compute
             style loss. Defaults to
-            ["conv_1", "conv_2", "conv_3", "conv_4", "conv_5"].
+            ["conv1_1", "conv2_1", "conv3_1", "conv4_1", "conv5_1"].
 
     Returns:
         Tuple:
@@ -82,40 +82,43 @@ def create_style_transfer_model(
             - style_losses (List[StyleLoss]): Style loss modules.
     """
     if content_layers is None:
-        content_layers = ["conv_4"]
+        content_layers = ["conv4_2"]
         
     if style_layers is None:
-        style_layers = ["conv_1", "conv_2", "conv_3", "conv_4", "conv_5"]
+        style_layers = ["conv1_1", "conv2_1", "conv3_1", "conv4_1", "conv5_1"]
         
     model = nn.Sequential(Normalization())
     cnn: nn.Sequential = _load_model()
     
     content_losses: List[ContentLoss] = []
     style_losses: List[StyleLoss] = []
-    conv_count: int = 0
+    block_count: int = 1
+    conv_in_block_count: int = 0
 
     for layer in cnn.children():
         name: str
         match layer:
             case nn.Conv2d():
-                conv_count += 1
-                name = f"conv_{conv_count}"
+                conv_in_block_count += 1
+                name = f"conv{block_count}_{conv_in_block_count}"
             case nn.ReLU():
-                name = f"relu_{conv_count}"
+                name = f"relu{block_count}_{conv_in_block_count}"
                 layer = nn.ReLU(inplace=False)
             case nn.MaxPool2d():
-                name = f"pool_{conv_count}"
+                name = f"pool{block_count}_{conv_in_block_count}"
+                block_count += 1
+                conv_in_block_count = 0
             case nn.BatchNorm2d():
-                name = f"batch_norm_{conv_count}"
+                name = f"batch_norm{block_count}_{conv_in_block_count}"
             case _:
                 raise RuntimeError(f'Unrecognized layer: {layer.__class__.__name__}')
         
         model.add_module(name, layer)
         if name in content_layers:
-            content_losses.append(_insert_content_loss_layer(model, content_img, f"content_loss_{conv_count}"))
+            content_losses.append(_insert_content_loss_layer(model, content_img, f"content_loss{block_count}_{conv_in_block_count}"))
         
         if name in style_layers:
-            style_losses.append(_insert_style_loss_layer(model, style_img, f"style_loss_{conv_count}"))
+            style_losses.append(_insert_style_loss_layer(model, style_img, f"style_loss{block_count}_{conv_in_block_count}"))
 
     return _trim_model(model), content_losses, style_losses
 
