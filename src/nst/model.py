@@ -4,8 +4,6 @@ Model utilities for neural style transfer.
 This module provides:
 
 - `Normalization`: a module to normalize images using ImageNet mean and std.
-- `StyleTransferResult`: A dataclass used to store the final image and loss histories
-  when `run_style_transfer` is called with `return_history=True`.
 - `create_style_transfer_model`: builds the style transfer model by inserting content and style loss layers
   at specified positions.
 - `create_optimizer`: Returns a PyTorch optimizer configured to update the input image.
@@ -25,35 +23,11 @@ from torch.optim import Optimizer
 
 from torchvision.models import vgg19, VGG19_Weights
 
+from nst.result import StyleTransferResult
+
 from .losses import ContentLoss, StyleLoss
 from .utils import CNN_NORMALIZATION_MEAN, CNN_NORMALIZATION_STD
 
-@dataclass
-class StyleTransferResult:
-    """
-    Stores the result of a neural style transfer experiment.
-
-    This object captures the optimized image along with
-    recorded loss histories if `return_history=True` was used
-    in `run_style_transfer`.
-
-    Attributes:
-        image (Tensor):
-            The final stylized image tensor of shape (1, C, H, W).
-
-        content_losses (List[float]):
-            Recorded content loss values at each optimization step.
-
-        style_losses (List[float]):
-            Recorded style loss values at each optimization step.
-
-        total_losses (List[float]):
-            Recorded total loss values (content + style) at each optimization step.
-    """
-    image: Tensor
-    content_losses: List[float]
-    style_losses: List[float]
-    total_losses: List[float]
 
 class Normalization(nn.Module):
     """
