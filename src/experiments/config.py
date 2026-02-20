@@ -19,7 +19,7 @@ from typing import List, Optional
 
 import yaml
 
-from paths import BASE_DIR
+from .paths import BASE_DIR, RESULTS_DIR
 
 
 @dataclass
@@ -41,6 +41,7 @@ class ExperimentConfig:
     steps: int = 400
     alpha: float = 1.0
     beta: float = 1_000_000.0
+    output_path: str = RESULTS_DIR
     content_layers: Optional[List[str]] = None
     style_layers: Optional[List[str]] = None
 
@@ -82,6 +83,7 @@ class ExperimentConfig:
             steps=args.steps if args.steps is not None else 400,
             alpha=args.alpha if args.alpha is not None else 1.0,
             beta=args.beta if args.beta is not None else 1_000_000.0,
+            output_path=BASE_DIR  + args.output_path,
             content_layers=args.content_layers,
             style_layers=args.style_layers
         )
@@ -99,6 +101,7 @@ class ExperimentConfig:
         Optional fields have default values:
             - image_size, steps, alpha, beta
             - content_layers, style_layers
+            - output_path
 
         Args:
             path (str): Path to the YAML configuration file.
@@ -125,6 +128,7 @@ class ExperimentConfig:
             steps=data.get("steps", 400),
             alpha=data.get("alpha", 1.0),
             beta=data.get("beta", 1_000_000.0),
+            output_path=data.get("output_path", RESULTS_DIR),
             content_layers=data.get("content_layers"),
             style_layers=data.get("style_layers"),
         )
@@ -146,6 +150,7 @@ class ExperimentConfig:
         parser.add_argument("--steps", type=int, help="optimization steps (default: 400).")
         parser.add_argument("--alpha", type=float, help="content loss weight (default: 1.0).")
         parser.add_argument("--beta", type=float, help="style loss weight (default: 1e6).")
+        parser.add_argument("--output_path", type=str, help="output path. (default: ./results/)")
         parser.add_argument("--content_layers", nargs="+", help="content loss layers (e.g. conv4_2).")
         parser.add_argument("--style_layers", nargs="+", help="style loss layers.")
         return parser

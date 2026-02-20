@@ -1,8 +1,9 @@
-content_image: data/content/sir_isaac_newton.jpg
-style_image: data/style/the_scream.jpg
+content_image: ./data/content/sir_isaac_newton.jpg
+style_image: ./data/style/the_scream.jpg
+output_path: ./results/output.jpg
 
 image_size: 512
-steps: 600
+steps: 100
 
 alpha: 1.0
 beta: 1000000.0
