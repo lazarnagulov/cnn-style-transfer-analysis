@@ -1,0 +1,18 @@
+content_image: data/content/sir_isaac_newton.jpg
+style_image: data/style/the_scream.jpg
+
+image_size: 512
+steps: 600
+
+alpha: 1.0
+beta: 1000000.0
+
+content_layers:
+  - conv4_2
+
+style_layers:
+  - conv1_1
+  - conv2_1
+  - conv3_1
+  - conv4_1
+  - conv5_1
