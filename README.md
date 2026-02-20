@@ -91,6 +91,7 @@ python ./src/main.py --config ./configs/config_example.yaml
 ```
 
 2. Using command-line arguments directly
+
 You can override any parameter directly via CLI without a YAML file:
 ```bash
 python ./src/main.py \
@@ -105,7 +106,5 @@ python ./src/main.py \
     --style_layers conv1_1 conv2_1 conv3_1 conv4_1 conv5_1 \
 ```
 > Note: CLI arguments will override any values defined in a YAML configuration.
-
-3. Output
 
 All stylized images are saved to the location specified by output_path (default is inside ./results/).
