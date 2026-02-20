@@ -41,6 +41,6 @@ def run_experiment(config: ExperimentConfig) -> None:
         steps=config.steps,
         alpha=config.alpha,
         beta=config.beta,
-        debug=True
+        log_every=20,
     )
     save_image(output, config.output_path)

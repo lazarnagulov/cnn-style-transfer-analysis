@@ -4,6 +4,8 @@ Model utilities for neural style transfer.
 This module provides:
 
 - `Normalization`: a module to normalize images using ImageNet mean and std.
+- `StyleTransferResult`: A dataclass used to store the final image and loss histories
+  when `run_style_transfer` is called with `return_history=True`.
 - `create_style_transfer_model`: builds the style transfer model by inserting content and style loss layers
   at specified positions.
 - `create_optimizer`: Returns a PyTorch optimizer configured to update the input image.
@@ -13,7 +15,8 @@ This module provides:
   returning the stylized output image.
 
 """
-from typing import List, Optional, Tuple
+from dataclasses import dataclass
+from typing import List, Optional, Tuple, Union
 import torch
 from torch import Tensor
 import torch.nn as nn
@@ -24,6 +27,33 @@ from torchvision.models import vgg19, VGG19_Weights
 
 from .losses import ContentLoss, StyleLoss
 from .utils import CNN_NORMALIZATION_MEAN, CNN_NORMALIZATION_STD
+
+@dataclass
+class StyleTransferResult:
+    """
+    Stores the result of a neural style transfer experiment.
+
+    This object captures the optimized image along with
+    recorded loss histories if `return_history=True` was used
+    in `run_style_transfer`.
+
+    Attributes:
+        image (Tensor):
+            The final stylized image tensor of shape (1, C, H, W).
+
+        content_losses (List[float]):
+            Recorded content loss values at each optimization step.
+
+        style_losses (List[float]):
+            Recorded style loss values at each optimization step.
+
+        total_losses (List[float]):
+            Recorded total loss values (content + style) at each optimization step.
+    """
+    image: Tensor
+    content_losses: List[float]
+    style_losses: List[float]
+    total_losses: List[float]
 
 class Normalization(nn.Module):
     """
@@ -94,7 +124,7 @@ def create_style_transfer_model(
     style_losses: List[StyleLoss] = []
     block_count: int = 1
     conv_in_block_count: int = 0
-
+ 
     for layer in cnn.children():
         name: str
         match layer:
@@ -144,40 +174,63 @@ def run_style_transfer(
     steps: int = 400,
     alpha: float = 1.0,
     beta: float = 1_000_000.0,
-    debug: bool = False,
-) -> Tensor:
+    return_history: bool = False,
+    log_every: int = 0,
+) -> Union[Tensor, StyleTransferResult]:
     """
     Run neural style transfer optimization.
 
-    This function constructs the style transfer model, then optimizes
-    the input image to simultaneously minimize content and style losses.
+    This function constructs the style transfer model and optimizes the
+    `input_img` to simultaneously minimize weighted content and style losses.
+    Optimization is performed in-place on `input_img` using L-BFGS.
 
-    The input image is updated in-place using L-BFGS.
+    Optionally, loss values can be recorded during optimization for later
+    analysis or plotting.
 
     Args:
-        content_img (Tensor): Preprocessed content image tensor of shape
-            (1, C, H, W).
-        style_img (Tensor): Preprocessed style image tensor of shape
-            (1, C, H, W).
-        input_img (Tensor): Initial image tensor to optimize. Typically
-            initialized as a copy of the content image or random noise.
-        steps (int, optional): Number of optimization iterations.
-            Defaults to 400.
-        alpha (float, optional): Weight assigned to the content loss.
-            Defaults to 1.0.
-        beta (float, optional): Weight assigned to the style loss.
-            Defaults to 1_000_000.0.
-        debug (bool): Show debug prints
-            Defaults to False
+        content_img (Tensor):
+            Preprocessed content image tensor of shape (1, C, H, W).
+
+        style_img (Tensor):
+            Preprocessed style image tensor of shape (1, C, H, W).
+
+        input_img (Tensor):
+            Initial image tensor to optimize. Typically initialized as a copy
+            of the content image or as random noise. This tensor is modified
+            in-place.
+
+        steps (int, optional):
+            Number of optimization iterations. Defaults to 400.
+
+        alpha (float, optional):
+            Weight assigned to the content loss. Defaults to 1.0.
+
+        beta (float, optional):
+            Weight assigned to the style loss. Defaults to 1_000_000.0.
+
+        return_history (bool, optional):
+            If True, record content, style, and total loss values at each
+            optimization step and return them alongside the final image.
+            Defaults to False.
+
+        log_every (int, optional):
+            If greater than 0, prints progress every `log_every` iterations.
+            If 0, disables progress logging. Defaults to 0.
+
     Returns:
-        Tensor: The optimized image tensor after style transfer.
+        - If `return_history` is False, returns the optimized image `Tensor` otherwise 
+        returns a `StyleTransferResult` 
     """
     model, content_losses, style_losses = create_style_transfer_model(style_img, content_img)
     input_img.requires_grad_(True)
     model.eval()
     model.requires_grad_(False)
     optimizer = create_optimizer(input_img)
-
+    
+    content_history: List[float] = []
+    style_history: List[float]   = []
+    total_history: List[float]   = []
+    
     def style_transfer_step():
         """
         Perform a single optimization step for L-BFGS.
@@ -198,14 +251,19 @@ def run_style_transfer(
         model(input_img)
         content_loss = alpha * sum(cl.loss for cl in content_losses)
         style_loss   = beta  * sum(sl.loss for sl in style_losses)
-
+        
         total_loss = style_loss + content_loss
         total_loss.backward() # ty: ignore
-        
-        return total_loss 
+
+        if return_history:
+            content_history.append(content_loss.item())
+            style_history.append(style_loss.item())
+            total_history.append(total_loss.item())
+            
+        return total_loss
 
     for i in range(steps):
-        if i % 20 == 0 and debug:
+        if log_every > 0 and  i % log_every == 0:
             print(f"Step {i}/{steps}")
         optimizer.step(style_transfer_step)
     
@@ -213,7 +271,15 @@ def run_style_transfer(
         input_img.clamp_(0,1)
         input_img.requires_grad_(False)
     
-    return input_img
+    if return_history:
+        return StyleTransferResult(
+            image=input_img,
+            content_losses=content_history,
+            style_losses=style_history,
+            total_losses=total_history,
+        )
+    else:
+        return input_img
 
 def _insert_content_loss_layer(model: nn.Sequential, content_img: Tensor, name: str) -> ContentLoss:
     """

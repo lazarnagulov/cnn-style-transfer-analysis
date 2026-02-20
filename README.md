@@ -97,7 +97,7 @@ You can override any parameter directly via CLI without a YAML file:
 python ./src/main.py \
     --content_image ./data/content/sir_isaac_newton.jpg \
     --style_image ./data/style/the_scream.jpg \
-    --output_path: ./results/output.jpg \
+    --output_path ./results/output.jpg \
     --image_size 512 \
     --steps 400 \
     --alpha 1.0 \
