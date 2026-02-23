@@ -37,11 +37,11 @@ class ExperimentConfig:
     """
     content_image: str
     style_image: str
-    output_path: str
     image_size: int = 512
     steps: int = 400
     alpha: float = 1.0
     beta: float = 1_000_000.0
+    output_path: str = ""
     content_layers: Optional[List[str]] = None
     style_layers: Optional[List[str]] = None
 
