@@ -75,6 +75,14 @@ GPU device: NVIDIA GeForce RTX 3060
 If `CUDA available` is True, your Neural Style Transfer will automatically run on the GPU, dramatically speeding up training.
 <br/>
 
+## Academic Poster
+
+The academic poster associated with this project is available here:
+
+[View Poster (PDF)](./docs/poster.png)
+
+You can also find it in the `docs/` directory.
+
 ## Running Experiments
 
 The project uses a configuration system (`ExperimentConfig`) which supports both YAML files and command-line arguments (CLI). 
