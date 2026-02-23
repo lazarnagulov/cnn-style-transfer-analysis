@@ -130,5 +130,18 @@ python ./src/main.py \
 
 All stylized images are saved to the location specified by output_path (default is inside ./results/).
 
+## Interactive Demo (Optional – Streamlit)
+
+In addition to CLI and YAML-based experiments, the project includes an optional interactive web interface built with [Streamlit](https://streamlit.io/).
+If you want to use the web interface:
+```bash
+pip install streamlit
+streamlit run ./src/app.py
+```
+After running the commands, Streamlit will open a local web server, typically at:
+```bash
+http://localhost:8501
+```
+
 ## References
 - Gatys, L. A., Ecker, A. S., & Bethge, M. (2015). A Neural Algorithm of Artistic Style.
