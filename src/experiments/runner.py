@@ -43,6 +43,8 @@ def run_experiment(config: ExperimentConfig) -> None:
         steps=config.steps,
         alpha=config.alpha,
         beta=config.beta,
+        style_layers=config.style_layers,
+        content_layers=config.content_layers,
         return_history=True,
         log_every=20,
     ))
