@@ -148,6 +148,8 @@ def run_style_transfer(
     steps: int = 400,
     alpha: float = 1.0,
     beta: float = 1_000_000.0,
+    style_layers: Optional[List[str]] = None,
+    content_layers: Optional[List[str]] = None,
     return_history: bool = False,
     log_every: int = 0,
 ) -> Union[Tensor, StyleTransferResult]:
@@ -162,31 +164,24 @@ def run_style_transfer(
     analysis or plotting.
 
     Args:
-        content_img (Tensor):
-            Preprocessed content image tensor of shape (1, C, H, W).
-
-        style_img (Tensor):
-            Preprocessed style image tensor of shape (1, C, H, W).
-
+        content_img (Tensor): Preprocessed content image tensor of shape (1, C, H, W).
+        style_img (Tensor): Preprocessed style image tensor of shape (1, C, H, W).
         input_img (Tensor):
             Initial image tensor to optimize. Typically initialized as a copy
             of the content image or as random noise. This tensor is modified
             in-place.
-
-        steps (int, optional):
-            Number of optimization iterations. Defaults to 400.
-
-        alpha (float, optional):
-            Weight assigned to the content loss. Defaults to 1.0.
-
-        beta (float, optional):
-            Weight assigned to the style loss. Defaults to 1_000_000.0.
-
+        steps (int, optional): Number of optimization iterations. Defaults to 400.
+        alpha (float, optional): Weight assigned to the content loss. Defaults to 1.0.
+        beta (float, optional): Weight assigned to the style loss. Defaults to 1_000_000.0.
+        content_layers (Optional[List[str]]): Layer names at which to compute
+            content loss. Defaults to ["conv4_2"].
+        style_layers (Optional[List[str]]): Layer names at which to compute
+            style loss. Defaults to
+            ["conv1_1", "conv2_1", "conv3_1", "conv4_1", "conv5_1"].
         return_history (bool, optional):
             If True, record content, style, and total loss values at each
             optimization step and return them alongside the final image.
             Defaults to False.
-
         log_every (int, optional):
             If greater than 0, prints progress every `log_every` iterations.
             If 0, disables progress logging. Defaults to 0.
@@ -195,7 +190,19 @@ def run_style_transfer(
         - If `return_history` is False, returns the optimized image `Tensor` otherwise 
         returns a `StyleTransferResult` 
     """
-    model, content_losses, style_losses = create_style_transfer_model(style_img, content_img)
+    
+    if content_layers is None:
+        content_layers = ["conv4_2"]
+        
+    if style_layers is None:
+        style_layers = ["conv1_1", "conv2_1", "conv3_1", "conv4_1", "conv5_1"]
+    
+    model, content_losses, style_losses = create_style_transfer_model(
+        style_img=style_img, 
+        content_img=content_img,
+        style_layers=style_layers,
+        content_layers=content_layers
+    )
     input_img.requires_grad_(True)
     model.eval()
     model.requires_grad_(False)

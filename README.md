@@ -79,7 +79,7 @@ If `CUDA available` is True, your Neural Style Transfer will automatically run o
 
 The academic poster associated with this project is available here:
 
-[View Poster (PDF)](./docs/poster.png)
+[View Poster](./docs/poster.png)
 
 You can also find it in the `docs/` directory.
 
@@ -129,6 +129,21 @@ python ./src/main.py \
 > Note: CLI arguments will override any values defined in a YAML configuration.
 
 All stylized images are saved to the location specified by output_path (default is inside ./results/).
+
+## Interactive Demo (Optional)
+
+In addition to CLI and YAML-based experiments, the project includes an optional interactive web interface built with [Streamlit](https://streamlit.io/).
+If you want to use the web interface:
+```bash
+pip install streamlit
+streamlit run ./src/app.py
+```
+After running the commands, Streamlit will open a local web server, typically at:
+```bash
+http://localhost:8501
+```
+
+![img](./docs/demo_app.png)
 
 ## References
 - Gatys, L. A., Ecker, A. S., & Bethge, M. (2015). A Neural Algorithm of Artistic Style.

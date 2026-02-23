@@ -19,7 +19,7 @@ from nst.utils import load_image, save_image, save_result
 from .config import ExperimentConfig
 
 
-def run_experiment(config: ExperimentConfig) -> None:
+def run_experiment(config: ExperimentConfig, return_history: bool = True) -> torch.Tensor:
     """
     Execute a full style transfer experiment.
 
@@ -27,6 +27,12 @@ def run_experiment(config: ExperimentConfig) -> None:
         config (ExperimentConfig): Configuration object containing
             content/style image paths, optimization parameters,
             layer selections, and output path.
+        return_history (bool, optional):
+            If True, record content, style, and total loss values at each
+            optimization step and save them alongside the final image.
+            Defaults to True.
+    Returns:
+        Tensor: The optimized image Tensor
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.set_default_device(device)
@@ -36,15 +42,22 @@ def run_experiment(config: ExperimentConfig) -> None:
     content_img = load_image(config.content_image, imsize, device)
     input_img   = content_img.clone()
 
-    result = cast(StyleTransferResult, run_style_transfer(
+    result = run_style_transfer(
         content_img=content_img, 
         style_img=style_img, 
         input_img=input_img,
         steps=config.steps,
         alpha=config.alpha,
         beta=config.beta,
-        return_history=True,
+        style_layers=config.style_layers,
+        content_layers=config.content_layers,
+        return_history=return_history,
         log_every=20,
-    ))
-    save_image(result.image, config.output_path)
-    save_result(result, config.output_path)
+    )
+    
+    if isinstance(result, StyleTransferResult):
+        save_image(result.image, config.output_path)
+        save_result(result, config.output_path)
+        return result.image
+    else:
+        return result
