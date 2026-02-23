@@ -79,7 +79,7 @@ If `CUDA available` is True, your Neural Style Transfer will automatically run o
 
 The academic poster associated with this project is available here:
 
-[View Poster (PDF)](./docs/poster.png)
+[View Poster](./docs/poster.png)
 
 You can also find it in the `docs/` directory.
 
