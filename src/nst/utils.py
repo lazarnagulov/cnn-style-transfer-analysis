@@ -8,10 +8,13 @@ This module provides:
 Typical usage:
     from utils import CNN_NORMALIZATION_MEAN, CNN_NORMALIZATION_STD
 """
+import csv
 import os
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
+
+from nst.result import StyleTransferResult
 
 CNN_NORMALIZATION_MEAN = torch.tensor([0.485, 0.456, 0.406])
 CNN_NORMALIZATION_STD  = torch.tensor([0.229, 0.224, 0.225])
@@ -62,3 +65,30 @@ def save_image(tensor: torch.Tensor, path: str, filename: str = "output.png") ->
     pil_image.save(path)
 
     print(f"Image saved to: {os.path.abspath(path)}")
+    
+def save_result(result: StyleTransferResult, path: str, name: str = "nst_result") -> None:
+    """
+    Save the loss history of a neural style transfer experiment.
+
+    Args:
+        result (StyleTransferResult): The result object returned by `run_style_transfer`.
+        path (str): Directory or full file path.
+        name (Optional[str]): Optional prefix name for files. Defaults to 'nst_result'.
+
+    Saves:
+        - Losses as {name}_losses.csv with columns: step, content_loss, style_loss, total_loss
+    """
+    os.makedirs(path, exist_ok=True)
+    csv_path = os.path.join(path, f"{name}_losses.csv")
+    steps = len(result.total_losses)
+    with open(csv_path, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["step", "content_loss", "style_loss", "total_loss"])
+        for i in range(steps):
+            writer.writerow([
+                i,
+                result.content_losses[i],
+                result.style_losses[i],
+                result.total_losses[i]
+            ])
+        print(f"Saved loss history to: {csv_path}")

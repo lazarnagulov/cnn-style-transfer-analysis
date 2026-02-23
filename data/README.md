@@ -6,16 +6,13 @@
 
 ### Style images
 
-1. Vincent van Gogh, *Tulip Fields near The Hague*, 1886  
+1. Vincent van Gogh, *Wheatfield with a Reaper*, 1889  
     Source: https://www.vangoghmuseum.nl/
 
-2. Vincent van Gogh, *Wheatfield with a Reaper*, 1889  
-    Source: https://www.vangoghmuseum.nl/
-
-3. Pablo Picasso, *Les Demoiselles d’Avignon*, 1907  
+2. Pablo Picasso, *Les Demoiselles d’Avignon*, 1907  
     Source: https://commons.wikimedia.org/
 
-4. Edvard Munch, *The Scream*, 1893  
+3. Edvard Munch, *The Scream*, 1893  
     Source: https://commons.wikimedia.org/
 
 ### Content images
