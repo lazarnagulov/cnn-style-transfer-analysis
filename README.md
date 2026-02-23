@@ -2,7 +2,19 @@
 
 <div align="center"> 
     <h1 align="center">Convolutional neural network style transfer analysis</h1> 
+    <p align="center"> <br /> 
+        <a href="https://github.com/lazarnagulov/cnn-style-transfer-analysis/issues/new?labels=bug">Report Bug</a> 
+    </p> 
 </div> 
+
+## About The Project
+
+This project explores how convolutional neural networks represent visual information at different network depths, using Neural Style Transfer (NST) as an analytical tool.
+
+![img](./docs/title_image.png)
+
+The implementation follows the method proposed by Gatys et al. (2015), using a pretrained VGG19 network with frozen weights. Optimization is performed directly on the input image by minimizing a weighted combination of content and style loss, where style is represented via Gram matrices of selected layer activations. L-BFGS is used as the optimizer.
+
 
 ## Getting Started
 Before running the project, ensure you have Python 3.10+ installed.
@@ -20,8 +32,9 @@ cd cnn-style-transfer-analysis
 ```
 2. Create and activate virtual environment (optional but recommended):
 ```bash
-chmod +x venv.sh && ./venv.sh   # Linux / macOS
-call venv.bat                   # Windows (use CMD, not integrated terminal) 
+python -m venv venv
+source venv/bin/activate   # Linux / macOS
+venv\Scripts\activate      # Windows
 ```
 3.  Install dependencies:
 
@@ -70,7 +83,7 @@ The project uses a configuration system (`ExperimentConfig`) which supports both
 ```yaml
 content_image: ./data/content/sir_isaac_newton.jpg
 style_image: ./data/style/the_scream.jpg
-output_path: ./results/output.jpg
+output_path: ./results
 image_size: 512
 steps: 100
 alpha: 1.0
@@ -108,3 +121,6 @@ python ./src/main.py \
 > Note: CLI arguments will override any values defined in a YAML configuration.
 
 All stylized images are saved to the location specified by output_path (default is inside ./results/).
+
+## References
+- Gatys, L. A., Ecker, A. S., & Bethge, M. (2015). A Neural Algorithm of Artistic Style.
