@@ -10,6 +10,7 @@ Typical usage:
 """
 import csv
 import os
+from typing import Union
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
@@ -20,18 +21,23 @@ CNN_NORMALIZATION_MEAN = torch.tensor([0.485, 0.456, 0.406])
 CNN_NORMALIZATION_STD  = torch.tensor([0.229, 0.224, 0.225])
 
 
-def load_image(image_name: str, image_size: int, device: torch.device) -> torch.Tensor:
+def load_image(
+    image_input: Union[str, Image.Image],
+    image_size: int,
+    device: torch.device
+) -> torch.Tensor:
     """
-    Load an image from disk and convert it to a normalized tensor suitable for
-    neural style transfer processing.
+    Load an image from disk or from a PIL Image object and convert it to a
+    normalized tensor suitable for neural style transfer processing.
 
     Args:
-        image_name (str): Path to the input image file.
+        image_input (Union[str, Image.Image]): Path to the input image file
+            or a preloaded PIL Image instance.
         image_size (int): Desired image size.
         device (torch.device): Device to load the image onto (e.g., 'cpu' or 'cuda').
 
     Returns:
-        torch.Tensor: Image tensor of shape (1, 3, H, W) on the specified device, 
+        torch.Tensor: Image tensor of shape (1, 3, H, W) on the specified device,
                       with pixel values scaled to [0,1].
     """
     loader = transforms.Compose([
@@ -39,7 +45,14 @@ def load_image(image_name: str, image_size: int, device: torch.device) -> torch.
         transforms.CenterCrop(image_size),
         transforms.ToTensor()
     ])
-    image = Image.open(image_name)
+
+    if isinstance(image_input, str):
+        image = Image.open(image_input).convert("RGB")
+    elif isinstance(image_input, Image.Image):
+        image = image_input.convert("RGB")
+    else:
+        raise TypeError(f"Unsupported image type: {type(image_input)}. Expected str or PIL.Image.Image.")
+
     image = loader(image).unsqueeze(0)
     return image.to(device, torch.float)
 
